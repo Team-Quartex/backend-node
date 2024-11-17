@@ -1,0 +1,9 @@
+Table: product_reviews
+Columns:
+reviewId int(11) PK 
+productId int(11) 
+userid int(11) 
+reviewRate double 
+review_content varchar(250) 
+availibility varchar(45) 
+reviewtime timestamp
