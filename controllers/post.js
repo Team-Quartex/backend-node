@@ -14,13 +14,17 @@ export const getPosts = (req, res) => {
             u.userid AS UserId, 
             u.name, 
             u.profilePic,
+            COUNT(pc.postId) AS comments,
+            GROUP_CONCAT(pl.userId) AS likeduser,
             GROUP_CONCAT(pi.imageLink) AS images
         FROM posts AS p
         JOIN users AS u ON u.userid = p.userId
         LEFT JOIN post_image AS pi ON pi.postId = p.postId
+        LEFT JOIN post_likes AS pl ON pl.postId = p.postId
+        LEFT JOIN post_comments AS pc ON pc.postId = p.postId
         GROUP BY p.postId, u.userid
-        ORDER bY p.postTime DESC;
-        `;
+        ORDER bY p.postTime DESC
+        Limit 20`;
 
         db.query(q, (err, data) => {
         if (err) return res.status(500).json(err);
@@ -28,7 +32,8 @@ export const getPosts = (req, res) => {
         // Transform the `images` field from comma-separated string to an array
         const formattedData = data.map((post) => ({
             ...post,
-            images: post.images ? post.images.split(",") : [], // Handle null values for posts without images
+            images: post.images ? post.images.split(",") : [], // Transform images into an array
+            likeduser: post.likeduser ? post.likeduser.split(",") : [], // Transform likeduser into an array
         }));
 
         return res.status(200).json(formattedData);
@@ -38,7 +43,6 @@ export const getPosts = (req, res) => {
 
 
 export const addPost = (req, res) => {
-
     const token = req.cookies.accessToken;
   if (!token) return res.status(401).json("Not Logged in!");
 

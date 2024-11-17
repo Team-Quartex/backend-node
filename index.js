@@ -65,7 +65,7 @@ const storage = multer.diskStorage({
   const upload = multer({ storage });
   
   // API endpoint for multiple file uploads
-  app.post('/api/upload', upload.array('photos', 5), (req, res) => {
+  app.post('/api/upload', upload.array('file-1', 5), (req, res) => {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: 'No files uploaded' });
     }
