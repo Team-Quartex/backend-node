@@ -8,6 +8,7 @@ import seller from './routes/sellers.js'
 import products from './routes/products.js'
 import reviews from './routes/reviews.js'
 import reservation from './routes/reservations.js'
+import postSearchs from './routes/postSearchs.js'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import multer from 'multer'
@@ -43,6 +44,7 @@ app.use("/api/seller",seller);
 app.use("/api/products",products)
 app.use("/api/reviews",reviews)
 app.use("/api/reservation",reservation)
+app.use("/api/search",postSearchs)
 
 
 

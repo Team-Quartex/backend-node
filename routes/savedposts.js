@@ -4,13 +4,13 @@ import {getsavedpost,addsavedpost,reomvesavedpost} from '../controllers/savedpos
 
 const router = express.Router();
 
-router.get("/",getsavedpost)
+router.get("/getsavedposts",getsavedpost)
 // GET http://localhost:8000/api/likes?postId=1
 
-router.post("/",addsavedpost)
+router.post("/addsavedposts",addsavedpost)
 // POST http://localhost:8000/api/likes body - {"postId":1}
 
-router.delete("/",reomvesavedpost)
+router.delete("/removesavedpost",reomvesavedpost)
 // DELETE http://localhost:8000/api/likes
 
 

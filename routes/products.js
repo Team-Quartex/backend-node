@@ -5,6 +5,7 @@ const router = express.Router();
 
 router.post("/add",addproduct)
 router.get("/viewall",getallproducts)
+// api/
 router.get("/viewseller",getsellerproducts)
 router.delete("/delete",)
 router.put("/edit",)
