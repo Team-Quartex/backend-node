@@ -86,7 +86,7 @@ export const  getallproducts = (req,res) =>{
         SELECT 
             p.*, 
             u.sid AS UserId, 
-            u.name, 
+            u.name AS sellername, 
             GROUP_CONCAT(pi.imageLink) AS images
         FROM products AS p
         JOIN sellers AS u ON u.sid = p.sellerId

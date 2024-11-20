@@ -2,6 +2,7 @@ import { db } from "../conect.js";
 import jwt from "jsonwebtoken";
 
 export const getPosts = (req, res) => {
+    console.log("hi");
   const token = req.cookies.accessToken;
   if (!token) return res.status(401).json("Not Logged in!");
 
@@ -14,19 +15,26 @@ export const getPosts = (req, res) => {
             u.userid AS UserId, 
             u.name, 
             u.profilePic,
+            u.verify,
             COUNT(pc.postId) AS comments,
             GROUP_CONCAT(pl.userId) AS likeduser,
-            GROUP_CONCAT(pi.imageLink) AS images
+            GROUP_CONCAT(pi.imageLink) AS images,
+            CASE 
+        WHEN uf.folowing_by IS NOT NULL THEN 'yes'
+        ELSE 'no'
+        END AS isFollowed
         FROM posts AS p
         JOIN users AS u ON u.userid = p.userId
         LEFT JOIN post_image AS pi ON pi.postId = p.postId
         LEFT JOIN post_likes AS pl ON pl.postId = p.postId
         LEFT JOIN post_comments AS pc ON pc.postId = p.postId
+        LEFT JOIN 
+   		 user_follows AS uf ON uf.follow = u.userid AND uf.folowing_by = ?
         GROUP BY p.postId, u.userid
         ORDER bY p.postTime DESC
         Limit 20`;
 
-        db.query(q, (err, data) => {
+        db.query(q,[userInfo.id], (err, data) => {
         if (err) return res.status(500).json(err);
 
         // Transform the `images` field from comma-separated string to an array

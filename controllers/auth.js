@@ -59,3 +59,4 @@ export const logOut = (req,res)=>{
         sameSite:"none"
     }).status(200).json("User has been logged out!")
 }
+

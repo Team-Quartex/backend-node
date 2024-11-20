@@ -1,5 +1,6 @@
 import express from 'express'
 import {addproduct,getallproducts,getsellerproducts} from '../controllers/product.js'
+import {allCategory} from '../controllers/productCategory.js'
 
 const router = express.Router();
 
@@ -9,6 +10,7 @@ router.get("/viewall",getallproducts)
 router.get("/viewseller",getsellerproducts)
 router.delete("/delete",)
 router.put("/edit",)
+router.get("/category",allCategory)
 
 
 
