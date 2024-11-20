@@ -85,16 +85,26 @@ export const  getallproducts = (req,res) =>{
     const q = `
         SELECT 
             p.*, 
-            u.sid AS UserId, 
             u.name AS sellername, 
-            GROUP_CONCAT(pi.imageLink) AS images
+            GROUP_CONCAT(pi.imageLink) AS images,
+            AVG(pr.reviewRate) AS avgReviewRate,
+            COUNT(pr.reviewRate) AS totalReviews,
+            CASE 
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM product_favourite AS pf 
+                    WHERE pf.productId = p.productId AND pf.userId = ?
+                ) THEN 'Yes'
+                ELSE 'No'
+            END AS isFavourite
         FROM products AS p
         JOIN sellers AS u ON u.sid = p.sellerId
         LEFT JOIN product_images AS pi ON pi.productId = p.productId
+        LEFT JOIN product_reviews AS pr ON pr.productId = p.productId
         GROUP BY p.productId, u.sid
-        ORDER bY p.postAt DESC`;
+        ORDER BY p.postAt DESC;`;
 
-        db.query(q, (err, data) => {
+        db.query(q,[userInfo.id], (err, data) => {
         if (err) return res.status(500).json(err);
 
         // Transform the `images` field from comma-separated string to an array
