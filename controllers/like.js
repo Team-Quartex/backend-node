@@ -39,7 +39,7 @@ export const deleteLike = (req, res) => {
     if (err) return res.status(403).json("Token is not valid");
 
     const q = "DELETE FROM post_likes WHERE `postId`= ? AND `userId`=?";
-        db.query(q,[req.query.postId,userInfo.id] ,(err, data) => {
+        db.query(q,[req.body.postId,userInfo.id] ,(err, data) => {
             if(err) return res.status(500).json(err);
             return res.status(200).json("Post has been Disliked");
         });

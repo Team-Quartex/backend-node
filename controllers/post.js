@@ -9,30 +9,29 @@ export const getPosts = (req, res) => {
   jwt.verify(token, "secretkey", (err, userInfo) => {
     if (err) return res.status(403).json("Token is not valid");
 
-    const q = `
-        SELECT 
-            p.*, 
-            u.userid AS UserId, 
-            u.name, 
-            u.profilePic,
-            u.verify,
-            COUNT(pc.postId) AS comments,
-            GROUP_CONCAT(pl.userId) AS likeduser,
-            GROUP_CONCAT(pi.imageLink) AS images,
-            CASE 
-        WHEN uf.folowing_by IS NOT NULL THEN 'yes'
-        ELSE 'no'
-        END AS isFollowed
-        FROM posts AS p
-        JOIN users AS u ON u.userid = p.userId
-        LEFT JOIN post_image AS pi ON pi.postId = p.postId
-        LEFT JOIN post_likes AS pl ON pl.postId = p.postId
-        LEFT JOIN post_comments AS pc ON pc.postId = p.postId
-        LEFT JOIN 
-   		 user_follows AS uf ON uf.follow = u.userid AND uf.folowing_by = ?
-        GROUP BY p.postId, u.userid
-        ORDER bY p.postTime DESC
-        Limit 20`;
+    const q = `SELECT 
+                    p.*, 
+                    u.userid AS UserId, 
+                    u.name, 
+                    u.profilePic,
+                    u.verify,
+                    COUNT(pc.postId) AS comments,
+                    GROUP_CONCAT(DISTINCT pl.userId) AS likeduser, -- Use DISTINCT here
+                    GROUP_CONCAT(pi.imageLink) AS images,
+                    CASE 
+                        WHEN uf.folowing_by IS NOT NULL THEN 'yes'
+                        ELSE 'no'
+                    END AS isFollowed
+                FROM posts AS p
+                JOIN users AS u ON u.userid = p.userId
+                LEFT JOIN post_image AS pi ON pi.postId = p.postId
+                LEFT JOIN post_likes AS pl ON pl.postId = p.postId
+                LEFT JOIN post_comments AS pc ON pc.postId = p.postId
+                LEFT JOIN 
+                    user_follows AS uf ON uf.follow = u.userid AND uf.folowing_by = ?
+                GROUP BY p.postId, u.userid
+                ORDER BY p.postTime DESC
+                LIMIT 20`;
 
         db.query(q,[userInfo.id], (err, data) => {
         if (err) return res.status(500).json(err);

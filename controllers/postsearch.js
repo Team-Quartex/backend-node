@@ -135,8 +135,9 @@ function getSearchResQuery(id,search, callback) {
     u.userid AS UserId, 
     u.name, 
     u.profilePic,
+    u.verify,
     COUNT(pc.postId) AS comments,
-    GROUP_CONCAT(pl.userId) AS likeduser,
+    GROUP_CONCAT(DISTINCT pl.userId) AS likeduser, -- Ensure unique user IDs
     GROUP_CONCAT(pi.imageLink) AS images,
     CASE 
         WHEN uf.folowing_by IS NOT NULL THEN 'yes'
@@ -149,13 +150,14 @@ LEFT JOIN post_likes AS pl ON pl.postId = p.postId
 LEFT JOIN post_comments AS pc ON pc.postId = p.postId
 LEFT JOIN 
     user_follows AS uf ON uf.follow = u.userid AND uf.folowing_by = ?
-WHERE p.description LIKE ?
+WHERE p.description LIKE ? OR p.location = ? 
 GROUP BY p.postId, u.userid
 ORDER BY p.postTime DESC
+
   `;
   const searchTerm = `%${search}%`;
 
-  db.query(q, [id,searchTerm], (err, data) => {
+  db.query(q, [id,searchTerm,searchTerm], (err, data) => {
     if (err) return callback(err);
     const formattedData = data.map((post) => ({
       ...post,
