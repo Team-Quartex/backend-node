@@ -1,8 +1,8 @@
 import { db } from "../conect.js";
 import jwt from "jsonwebtoken";
+import {formatPostTime} from '../resource/timeformat.js'
 
 export const getPosts = (req, res) => {
-    console.log("hi");
   const token = req.cookies.accessToken;
   if (!token) return res.status(401).json("Not Logged in!");
 
@@ -15,7 +15,7 @@ export const getPosts = (req, res) => {
                     u.name, 
                     u.profilePic,
                     u.verify,
-                    COUNT(pc.postId) AS comments,
+                    COUNT(DISTINCT pc.postId) AS comments,
                     GROUP_CONCAT(DISTINCT pl.userId) AS likeduser, -- Use DISTINCT here
                     GROUP_CONCAT(pi.imageLink) AS images,
                     CASE 
@@ -40,7 +40,8 @@ export const getPosts = (req, res) => {
         const formattedData = data.map((post) => ({
             ...post,
             images: post.images ? post.images.split(",") : [], // Transform images into an array
-            likeduser: post.likeduser ? post.likeduser.split(",") : [], // Transform likeduser into an array
+            likeduser: post.likeduser ? post.likeduser.split(",") : [],
+            postTime: formatPostTime(post.postTime), // Transform likeduser into an array
         }));
 
         return res.status(200).json(formattedData);

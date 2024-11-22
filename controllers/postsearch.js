@@ -1,6 +1,7 @@
 import { db } from "../conect.js";
 import { english } from "../resource/english.js";
 import jwt from "jsonwebtoken";
+import {formatPostTime} from '../resource/timeformat.js'
 
 // Function to get post tags
 function getPostTags(callback) {
@@ -163,7 +164,8 @@ ORDER BY p.postTime DESC
       ...post,
       images: post.images ? post.images.split(",") : [], // Transform images into an array
       likeduser: post.likeduser ? post.likeduser.split(",") : [], // Transform likeduser into an array
-  }));
+      postTime: formatPostTime(post.postTime),
+    }));
     callback(null, formattedData);
   });
 }
