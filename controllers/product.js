@@ -85,8 +85,10 @@ export const  getallproducts = (req,res) =>{
     const q = `
         SELECT 
             p.*, 
-            u.name AS sellername, 
-            GROUP_CONCAT(pi.imageLink) AS images,
+            u.name AS sellername,
+            u.profilepic AS profile,
+            u.email,
+            GROUP_CONCAT(DISTINCT pi.imageLink) AS images,
             AVG(pr.reviewRate) AS avgReviewRate,
             COUNT(pr.reviewRate) AS totalReviews,
             CASE 

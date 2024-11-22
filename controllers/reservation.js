@@ -29,7 +29,7 @@ export const checkReservation = (req, res) => {
 
     db.query(
       q,
-      [req.body.end, req.body.start, req.body.itemId],
+      [req.query.end, req.query.start, req.query.itemId],
       (err, data) => {
         if (err) return res.status(500).json(err);
         return res.status(200).json(data);
@@ -59,7 +59,7 @@ export const addReservation = (req, res) => {
       ],
       (err, result) => {
         if (err) return res.status(500).json(err);
-        return res.status(201).json("Reservation added successfully!");
+        return res.status(200).json("Reservation added successfully!");
       }
     );
   });
