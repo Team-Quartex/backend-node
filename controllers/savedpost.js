@@ -10,20 +10,23 @@ export const getsavedpost = (req,res)=>{
     if (err) return res.status(403).json("Token is not valid");
 
     const q = `SELECT 
-                    p.*, 
-                    u.userid AS UserId, 
-                    u.name, 
-                    u.profilePic,
-                    GROUP_CONCAT(pi.imageLink) AS images
-                FROM posts AS p
-                JOIN users AS u ON u.userid = p.userId
-                LEFT JOIN post_image AS pi ON pi.postId = p.postId
-                WHERE p.postId IN (
-                    SELECT postId FROM saved_posts WHERE userId = ?
-                )
-                GROUP BY p.postId, u.userid
-                ORDER BY p.postTime DESC;
-                `;
+    p.*, 
+    u.userid AS UserId, 
+    u.name, 
+    u.profilePic,
+    COUNT(pc.postId) AS comments, 
+    GROUP_CONCAT(pl.userId) AS likeduser, 
+    GROUP_CONCAT(pi.imageLink) AS images
+FROM posts AS p
+JOIN users AS u ON u.userid = p.userId
+LEFT JOIN post_image AS pi ON pi.postId = p.postId
+LEFT JOIN post_likes AS pl ON pl.postId = p.postId
+LEFT JOIN post_comments AS pc ON pc.postId = p.postId
+WHERE p.postId IN (
+    SELECT postId FROM saved_posts WHERE userId = ?
+)
+GROUP BY p.postId, u.userid
+ORDER BY p.postTime DESC;`
 
                 db.query(q,[userInfo.id],(err,data)=>{
                 if(err) return res.status(500).json(err);
@@ -31,6 +34,7 @@ export const getsavedpost = (req,res)=>{
                 const formattedData = data.map((post) => ({
                     ...post,
                     images: post.images ? post.images.split(",") : [], // Handle null values for posts without images
+                    likeduser: post.likeduser ? post.likeduser.split(",") : [], 
                 }));
 
                 return res.status(200).json(formattedData);

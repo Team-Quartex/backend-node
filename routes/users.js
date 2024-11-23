@@ -1,5 +1,6 @@
 import express from 'express'
 import { login,register,logOut } from '../controllers/auth.js';
+import { topusers, userDetails , addfollower } from '../controllers/user.js';
 
 const router = express.Router();
 
@@ -11,6 +12,13 @@ router.post('/login',login);
 
 router.get('/logout',logOut);
 // GET - http://localhost:8000/api/users/logout
+
+router.get('/topusers',topusers)
+
+router.get('/userDetails',userDetails)
+
+router.get('/addfollower',addfollower)
+
 
 
 

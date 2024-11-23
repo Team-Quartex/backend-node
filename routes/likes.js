@@ -6,10 +6,10 @@ const router = express.Router();
 router.get("/",getLikes)
 // GET http://localhost:8000/api/likes?postId=1
 
-router.post("/",addLike)
-// POST http://localhost:8000/api/likes body - {"postId":1}
+router.post("/add",addLike)
+// POST http://localhost:8000/api/likes/add body - {"postId":1}
 
-router.delete("/",deleteLike)
+router.post("/remove",deleteLike)
 // DELETE http://localhost:8000/api/likes
 
 

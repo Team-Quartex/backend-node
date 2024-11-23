@@ -25,7 +25,6 @@ export const register = (req,res)=>{
 
 export const login = (req,res)=>{
     // quey
-    console.log("bye")
     const q = "SELECT * FROM users WHERE username = ?";
     db.query(q,[req.body.username],(err,data)=>{
         if(err) return res.status(500).json(err);
@@ -39,12 +38,11 @@ export const login = (req,res)=>{
         //  assign to token when user is right
 
         const token = jwt.sign({id: data[0].userid},"secretkey");
-        console.log(token)
         // return without password
         const {password, ...others} = data[0];
-        console.log("ji")
         // assign cookie
         let thirtyDays = 1000 * 60 * 60 * 24 * 30;
+        
         res.cookie("accessToken",token,{
             maxAge: thirtyDays,
             secure:true,
@@ -61,3 +59,4 @@ export const logOut = (req,res)=>{
         sameSite:"none"
     }).status(200).json("User has been logged out!")
 }
+
