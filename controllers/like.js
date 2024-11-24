@@ -1,5 +1,5 @@
 import { db } from "../conect.js";
-import {addLikednotification} from './addnotifications.js'
+import {addLikednotification , removeLikednotification} from './notifications.js'
 import jwt from "jsonwebtoken";
 
 export const getLikes = (req,res)=>{
@@ -12,7 +12,6 @@ export const getLikes = (req,res)=>{
 }
 
 export const addLike = (req, res) => {
-
     const token = req.cookies.accessToken;
     if (!token) return res.status(401).json("Not Logged in!");
 
@@ -25,11 +24,9 @@ export const addLike = (req, res) => {
         userInfo.id
     ]
         db.query(q,[values] ,(err, data) => {
-            console.log(err);
             if(err) return res.status(500).json(err);
-            console(req.body.postuser);
-            // addLikednotification(userInfo.id,req.body.postuser)
-            return res.status(200).json("Post has been Liked");
+            addLikednotification(userInfo.id,req.body.postuser,req.body.postId);
+            // return res.status(200).json("Post has been Liked");
         });
     });
 
@@ -46,6 +43,7 @@ export const deleteLike = (req, res) => {
         db.query(q,[req.body.postId,userInfo.id] ,(err, data) => {
             console.log(err);
             if(err) return res.status(500).json(err);
+            removeLikednotification(userInfo.id,req.body.postuser,req.body.postId)
             return res.status(200).json("Post has been Disliked");
         });
     });
