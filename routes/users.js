@@ -1,6 +1,6 @@
 import express from 'express'
 import { login,register,logOut } from '../controllers/auth.js';
-import { topusers, userDetails , addfollower } from '../controllers/user.js';
+import { topusers, userDetails , addfollower , userPost } from '../controllers/user.js';
 
 const router = express.Router();
 
@@ -18,6 +18,10 @@ router.get('/topusers',topusers)
 router.get('/userDetails',userDetails)
 
 router.get('/addfollower',addfollower)
+
+router.get('/userposts',userPost)
+
+
 
 
 

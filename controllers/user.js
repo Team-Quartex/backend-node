@@ -76,7 +76,7 @@ export const addfollower= (req,res) =>{
     })
 }
 
-export const userpost = (req,res) =>{
+export const userPost = (req,res) =>{
     const token = req.cookies.accessToken;
   if (!token) return res.status(401).json("Not Logged in!");
 
