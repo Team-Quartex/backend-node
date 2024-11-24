@@ -75,3 +75,51 @@ export const addfollower= (req,res) =>{
 
     })
 }
+
+export const userpost = (req,res) =>{
+    const token = req.cookies.accessToken;
+  if (!token) return res.status(401).json("Not Logged in!");
+
+  jwt.verify(token, "secretkey", (err, userInfo) => {
+    if (err) return res.status(403).json("Token is not valid");
+
+    q = `SELECT 
+                    p.*, 
+                    u.userid AS UserId, 
+                    u.name, 
+                    u.profilePic,
+                    u.verify,
+                    COUNT(DISTINCT pc.postId) AS comments,
+                    GROUP_CONCAT(DISTINCT pl.userId) AS likeduser, -- Use DISTINCT here
+                    GROUP_CONCAT(pi.imageLink) AS images,
+                    CASE 
+                        WHEN uf.folowing_by IS NOT NULL THEN 'yes'
+                        ELSE 'yes'
+                    END AS isFollowed
+                FROM posts AS p
+                JOIN users AS u ON u.userid = p.userId
+                LEFT JOIN post_image AS pi ON pi.postId = p.postId
+                LEFT JOIN post_likes AS pl ON pl.postId = p.postId
+                LEFT JOIN post_comments AS pc ON pc.postId = p.postId
+                LEFT JOIN 
+                    user_follows AS uf ON uf.follow = u.userid AND uf.folowing_by = ?
+                where u.userid = ?
+                GROUP BY p.postId, u.userid
+                ORDER BY p.postTime DESC`;
+
+    db.query(q,[userInfo.id,userInfo.id],(err,data)=>{
+        if (err) return res.status(500).json(err);
+
+        // Transform the `images` field from comma-separated string to an array
+        const formattedData = data.map((post) => ({
+            ...post,
+            images: post.images ? post.images.split(",") : [], // Transform images into an array
+            likeduser: post.likeduser ? post.likeduser.split(",") : [],
+            postTime: formatPostTime(post.postTime), // Transform likeduser into an array
+        }));
+
+        return res.status(200).json(formattedData);
+        });
+
+  })
+}

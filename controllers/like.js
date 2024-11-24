@@ -1,4 +1,5 @@
 import { db } from "../conect.js";
+import {addLikednotification} from './addnotifications.js'
 import jwt from "jsonwebtoken";
 
 export const getLikes = (req,res)=>{
@@ -26,6 +27,8 @@ export const addLike = (req, res) => {
         db.query(q,[values] ,(err, data) => {
             console.log(err);
             if(err) return res.status(500).json(err);
+            console(req.body.postuser);
+            // addLikednotification(userInfo.id,req.body.postuser)
             return res.status(200).json("Post has been Liked");
         });
     });

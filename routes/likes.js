@@ -9,7 +9,7 @@ router.get("/",getLikes)
 router.post("/add",addLike)
 // POST http://localhost:8000/api/likes/add body - {"postId":1}
 
-router.post("/remove",deleteLike)
+router.delete("/remove",deleteLike)
 // DELETE http://localhost:8000/api/likes
 
 
