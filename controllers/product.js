@@ -8,13 +8,13 @@ export const addproduct = (req,res)=>{
   jwt.verify(token, "secretkeyseller", (err, userInfo) => {
     if (err) return res.status(403).json("Token is not valid");
 
-    const q = "INSERT INTO products (`name`,`description`,`location`,`price`,`categoryId`,`sellerId`) VALUES (?)";
+    const q = "INSERT INTO products (`name`,`description`,`price`,`categoryId`,`qty`,`sellerId`) VALUES (?)";
     const values = [
         req.body.name,
         req.body.desc,
-        req.body.location,
         req.body.price,
         req.body.category,
+        req.body.qty,
         userInfo.id
     ]
         db.query(q,[values] ,(err, data) => {
@@ -46,7 +46,7 @@ export const  getsellerproducts = (req,res) =>{
     const q = `SELECT 
                     p.*, 
                     u.sid AS UserId, 
-                    u.name, 
+                    u.name AS username, 
                     GROUP_CONCAT(pi.imageLink) AS images
                 FROM 
                     products AS p

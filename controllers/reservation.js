@@ -112,11 +112,11 @@ export const sellerReservationsList = (req, res) => {
 };
 
 export const getSellerDateReservation = (req, res) => {
-  // const token = req.cookies.accessTokenseller;
-  // if (!token) return res.status(401).json("Not Logged in!");
+  const token = req.cookies.accessTokenseller;
+  if (!token) return res.status(401).json("Not Logged in!");
 
-  // jwt.verify(token, "secretkeyseller", (err, userInfo) => {
-  //   if (err) return res.status(403).json("Token is not valid");
+  jwt.verify(token, "secretkeyseller", (err, userInfo) => {
+    if (err) return res.status(403).json("Token is not valid");
 
     const q = `SELECT 
                   r.*, 
@@ -135,9 +135,9 @@ export const getSellerDateReservation = (req, res) => {
               LEFT JOIN users AS u ON u.userid = r.userId
               WHERE (r.startDate = ? OR r.endDate = ?)
                 AND s.sid = ?;`;
-    db.query(q, [req.query.date,req.query.date,req.query.date,req.query.date,3], (err, result) => {
+    db.query(q, [req.query.date,req.query.date,req.query.date,req.query.date,userInfo.id], (err, result) => {
       if (err) return res.status(500).json(err);
       return res.status(200).json(result);
     });
-  // });
+  });
 };

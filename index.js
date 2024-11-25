@@ -99,6 +99,21 @@ const storage = multer.diskStorage({
     }
 });
 
+app.get('/api/check-cookie-seller', (req, res) => {
+  const accessToken = req.cookies.accessTokenseller;
+
+  if (accessToken) {
+      res.json({
+          cookieFound: true,
+          cookieValue: accessToken
+      });
+  } else {
+      res.json({
+          cookieFound: false
+      });
+  }
+});
+
 app.get("/",(req,res)=>{
     res.send("hello");
 });
