@@ -118,3 +118,27 @@ export const userPost = (req, res) => {
     });
   });
 };
+
+export const updateduserDetails = (req, res) => {
+  const token = req.cookies.accessToken;
+  if (!token) return res.status(401).json("Not Logged in!");
+
+  jwt.verify(token, "secretkey", (err, userInfo) => {
+    if (err) return res.status(403).json("Token is not valid");
+    var q = '';
+    if(req.body.profilepic===""){
+        q = `UPDATE users SET name=?, mobile=? ,address=? WHERE userid=?`;
+        db.query(q,[req.body.name,req.body.phone,req.body.address,userInfo.id],(err,data)=>{
+            if (err) return res.status(500).json(err);
+            return res.status(200).json(data);
+        });
+    }else{
+        q = `UPDATE users SET name=?, mobile=? ,address=?,profilepic=? WHERE userid=?`;
+        db.query(q,[req.body.name,req.body.phone,req.body.address,req.body.profilepic,userInfo.id],(err,data)=>{
+            if (err) return res.status(500).json(err);
+            return res.status(200).json(data);
+        });
+    }
+
+  });
+};
