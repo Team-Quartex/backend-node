@@ -1,5 +1,6 @@
 import {db} from "../conect.js"
 import bcrypt from 'bcryptjs'
+import { json } from "express";
 import jwt from 'jsonwebtoken'
 
 export const registerseller = (req,res)=>{
@@ -62,4 +63,86 @@ export const sellerlogout = (req,res)=>{
         secure: true,
         sameSite:"none"
     }).status(200).json("User has been logged out!")
+}
+
+
+export const sellerStatics = (req,res) => {
+    const token = req.cookies.accessTokenseller;
+  if (!token) return res.status(401).json("Not Logged in!");
+
+  jwt.verify(token, "secretkeyseller", (err, userInfo) => {
+    if (err) return res.status(403).json("Token is not valid");
+
+    const q = `SELECT 
+                p.sellerId,
+                p.name AS productName,
+                COUNT(r.reservationId) AS rentedCount, -- Total reservations for the product
+                SUM(r.qty) AS totalQuantity, -- Total quantity rented
+                SUM(r.qty * p.price) AS totalPrice, -- Total revenue
+                SUM(r.qty * p.price) * 0.05 AS commission, -- 10% commission
+                SUM(r.qty * p.price) - (SUM(r.qty * p.price) * 0.05) AS netTotal -- Net revenue after commission
+            FROM 
+                products p
+            JOIN 
+                reservation r ON p.productId = r.productId
+            WHERE 
+                p.sellerId =?
+            GROUP BY 
+                p.productId
+            ORDER BY 
+                p.name;
+            `;
+    db.query(q,[userInfo.id],(err,data)=>{
+        console.log(err)
+        console.log(data)
+        if (err) return res.status(500).json(err);
+        return res.status(200).json(data);
+    })   
+
+})
+}
+
+export const sellerPayamnet = () =>{
+    const token = req.cookies.accessTokenseller;
+    if (!token) return res.status(401).json("Not Logged in!");
+  
+    jwt.verify(token, "secretkeyseller", (err, userInfo) => {
+      if (err) return res.status(403).json("Token is not valid");
+  
+      sellerStaticsQuery(userInfo.id,res,(err,data)=>{
+          if(err)return res.status(500).json(err);
+          var earnings = 0;
+          data.foreach((elemnt,index) => {
+            earnings = earnings + parseFloat(elemnt['netTotal']);
+          });
+          res.status(500).json(earnings);
+      })    
+  
+  }) 
+}
+
+const sellerStaticsQuery = (sellerID,res,callback)=>{
+    const q = `SELECT 
+                p.sellerId,
+                p.name AS productName,
+                COUNT(r.reservationId) AS rentedCount, -- Total reservations for the product
+                SUM(r.qty) AS totalQuantity, -- Total quantity rented
+                SUM(r.qty * p.price) AS totalPrice, -- Total revenue
+                SUM(r.qty * p.price) * 0.1 AS commission, -- 10% commission
+                SUM(r.qty * p.price) - (SUM(r.qty * p.price) * 0.1) AS netTotal -- Net revenue after commission
+            FROM 
+                products p
+            JOIN 
+                reservation r ON p.productId = r.productId
+            WHERE 
+                p.sellerId =?
+            GROUP BY 
+                p.productId
+            ORDER BY 
+                p.name;
+            `;
+    db.query(q,[sellerID],(err,data)=>{
+        if (err) return res.status(500).json(err);
+        callback (null,data)
+    })
 }
