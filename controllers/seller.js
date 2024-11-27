@@ -1,73 +1,82 @@
-import {db} from "../conect.js"
-import bcrypt from 'bcryptjs'
+import { db } from "../conect.js";
+import bcrypt from "bcryptjs";
 import { json } from "express";
-import jwt from 'jsonwebtoken'
+import jwt from "jsonwebtoken";
 
-export const registerseller = (req,res)=>{
-    // Check user if exists
-    const q = "SELECT * FROM sellers WHERE username = ?";
-    db.query(q,[req.body.username],(err,data)=>{
-        if(err) return res.status(500).json(err);
-        if(data.length) return res.status(409).json("User Already exists");
+export const registerseller = (req, res) => {
+  // Check user if exists
+  const q = "SELECT * FROM sellers WHERE username = ?";
+  db.query(q, [req.body.username], (err, data) => {
+    if (err) return res.status(500).json(err);
+    if (data.length) return res.status(409).json("User Already exists");
 
-        // create a new user
-        // Hash the password
-        const salt = bcrypt.genSaltSync(10);
-        const hashedPassword = bcrypt.hashSync(req.body.password,salt);
+    // create a new user
+    // Hash the password
+    const salt = bcrypt.genSaltSync(10);
+    const hashedPassword = bcrypt.hashSync(req.body.password, salt);
 
-        const q = "INSERT INTO sellers (`username`,`email`,`password`,`name`,`business_name`,`address`,`city`) VALUE (?)";
-        const values = [
-            req.body.username,
-            req.body.email,
-            hashedPassword,
-            req.body.name,
-            req.body.businessname,
-            req.body.address,
-            req.body.city    
-        ]
-        db.query(q,[values],(err,data)=>{
-            if(err) return res.status(500).json(err);
-            return res.status(200).json("User has been created");
-        });
+    const q =
+      "INSERT INTO sellers (`username`,`email`,`password`,`name`,`business_name`,`address`,`city`) VALUE (?)";
+    const values = [
+      req.body.username,
+      req.body.email,
+      hashedPassword,
+      req.body.name,
+      req.body.businessname,
+      req.body.address,
+      req.body.city,
+    ];
+    db.query(q, [values], (err, data) => {
+      if (err) return res.status(500).json(err);
+      return res.status(200).json("User has been created");
     });
-}
+  });
+};
 
-export const loginseller = (req,res)=>{
-    // quey
-    const q = "SELECT * FROM sellers WHERE username = ?";
-    db.query(q,[req.body.username],(err,data)=>{
-        if(err) return res.status(500).json(err);
-        if(data.length === 0 )return res.status(404).json("User not found!");
+export const loginseller = (req, res) => {
+  // quey
+  const q = "SELECT * FROM sellers WHERE username = ?";
+  db.query(q, [req.body.username], (err, data) => {
+    if (err) return res.status(500).json(err);
+    if (data.length === 0) return res.status(404).json("User not found!");
 
-        // check encrypt password
+    // check encrypt password
 
-        const checkPassword = bcrypt.compareSync(req.body.password,data[0].password);
-        if(!checkPassword) return res.status(400).json("Wrong password or username!");
-        
-        //  assign to token when user is right
+    const checkPassword = bcrypt.compareSync(
+      req.body.password,
+      data[0].password
+    );
+    if (!checkPassword)
+      return res.status(400).json("Wrong password or username!");
 
-        const token = jwt.sign({id: data[0].sid},"secretkeyseller");
-        // return without password
-        const {password, ...others} = data[0];
+    //  assign to token when user is right
 
-        // assign cookie
-        res.cookie("accessTokenseller",token,{
-            httpOnly: true,
-        }).status(200).json(others);
+    const token = jwt.sign({ id: data[0].sid }, "secretkeyseller");
+    // return without password
+    const { password, ...others } = data[0];
+
+    // assign cookie
+    res
+      .cookie("accessTokenseller", token, {
+        httpOnly: true,
+      })
+      .status(200)
+      .json(others);
+  });
+};
+
+export const sellerlogout = (req, res) => {
+  res
+    .clearCookie("accessTokenseller", {
+      secure: true,
+      sameSite: "none",
     })
+    .status(200)
+    .json("User has been logged out!");
+};
 
-}
-
-export const sellerlogout = (req,res)=>{
-    res.clearCookie("accessTokenseller",{
-        secure: true,
-        sameSite:"none"
-    }).status(200).json("User has been logged out!")
-}
-
-
-export const sellerStatics = (req,res) => {
-    const token = req.cookies.accessTokenseller;
+export const sellerStatics = (req, res) => {
+  const token = req.cookies.accessTokenseller;
   if (!token) return res.status(401).json("Not Logged in!");
 
   jwt.verify(token, "secretkeyseller", (err, userInfo) => {
@@ -76,53 +85,44 @@ export const sellerStatics = (req,res) => {
     const q = `SELECT 
                 p.sellerId,
                 p.name AS productName,
-                COUNT(r.reservationId) AS rentedCount, -- Total reservations for the product
+                COUNT(r.reservationId) AS rentedCount, -- Total number of products rented
                 SUM(r.qty) AS totalQuantity, -- Total quantity rented
                 SUM(r.qty * p.price) AS totalPrice, -- Total revenue
-                SUM(r.qty * p.price) * 0.05 AS commission, -- 10% commission
+                SUM(r.qty * p.price) * 0.05 AS commission, -- 5% commission
                 SUM(r.qty * p.price) - (SUM(r.qty * p.price) * 0.05) AS netTotal -- Net revenue after commission
             FROM 
                 products p
             JOIN 
                 reservation r ON p.productId = r.productId
             WHERE 
-                p.sellerId =?
-            GROUP BY 
-                p.productId
-            ORDER BY 
-                p.name;
-            `;
-    db.query(q,[userInfo.id],(err,data)=>{
-        console.log(err)
-        console.log(data)
-        if (err) return res.status(500).json(err);
-        return res.status(200).json(data);
-    })   
+                p.sellerId = ?;`;
+    db.query(q, [userInfo.id], (err, data) => {
+      if (err) return res.status(500).json(err);
+      return res.status(200).json(data);
+    });
+  });
+};
 
-})
-}
+export const sellerPayamnet = () => {
+  const token = req.cookies.accessTokenseller;
+  if (!token) return res.status(401).json("Not Logged in!");
 
-export const sellerPayamnet = () =>{
-    const token = req.cookies.accessTokenseller;
-    if (!token) return res.status(401).json("Not Logged in!");
-  
-    jwt.verify(token, "secretkeyseller", (err, userInfo) => {
-      if (err) return res.status(403).json("Token is not valid");
-  
-      sellerStaticsQuery(userInfo.id,res,(err,data)=>{
-          if(err)return res.status(500).json(err);
-          var earnings = 0;
-          data.foreach((elemnt,index) => {
-            earnings = earnings + parseFloat(elemnt['netTotal']);
-          });
-          res.status(500).json(earnings);
-      })    
-  
-  }) 
-}
+  jwt.verify(token, "secretkeyseller", (err, userInfo) => {
+    if (err) return res.status(403).json("Token is not valid");
 
-const sellerStaticsQuery = (sellerID,res,callback)=>{
-    const q = `SELECT 
+    sellerStaticsQuery(userInfo.id, res, (err, data) => {
+      if (err) return res.status(500).json(err);
+      var earnings = 0;
+      data.foreach((elemnt, index) => {
+        earnings = earnings + parseFloat(elemnt["netTotal"]);
+      });
+      res.status(500).json(earnings);
+    });
+  });
+};
+
+const sellerStaticsQuery = (sellerID, res, callback) => {
+  const q = `SELECT 
                 p.sellerId,
                 p.name AS productName,
                 COUNT(r.reservationId) AS rentedCount, -- Total reservations for the product
@@ -141,8 +141,8 @@ const sellerStaticsQuery = (sellerID,res,callback)=>{
             ORDER BY 
                 p.name;
             `;
-    db.query(q,[sellerID],(err,data)=>{
-        if (err) return res.status(500).json(err);
-        callback (null,data)
-    })
-}
+  db.query(q, [sellerID], (err, data) => {
+    if (err) return res.status(500).json(err);
+    callback(null, data);
+  });
+};
