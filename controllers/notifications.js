@@ -1,4 +1,5 @@
 import { db } from "../conect.js";
+import {formatPostTime} from '../resource/timeformat.js'
 import jwt from "jsonwebtoken";
 
 export const getnotifications = (req, res) => {
@@ -14,7 +15,12 @@ export const getnotifications = (req, res) => {
                 ORDER BY n.notifiedtime DESC `;
     db.query(q, [userInfo.id], (err, data) => {
       if (err) return res.status(500).json(err);
-      return res.status(200).json(data);
+      const formattedData = data.map((notification) => ({
+        ...notification,
+        notifiedtime: formatPostTime(notification.notifiedtime), // Transform likeduser into an array
+      }));
+
+      return res.status(200).json(formattedData);
     });
   });
 };

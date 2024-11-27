@@ -17,7 +17,7 @@ export const getPosts = (req, res) => {
                     u.verify,
                     COUNT(DISTINCT pc.postId) AS comments,
                     GROUP_CONCAT(DISTINCT pl.userId) AS likeduser, -- Use DISTINCT here
-                    GROUP_CONCAT(pi.imageLink) AS images,
+                    GROUP_CONCAT(DISTINCT pi.imageLink) AS images,
                     CASE 
                         WHEN uf.folowing_by IS NOT NULL THEN 'yes'
                         ELSE 'no'

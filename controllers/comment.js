@@ -1,13 +1,21 @@
 import { db } from "../conect.js";
 import jwt from "jsonwebtoken";
 import {addCommentNotification,removeCommentnotification} from './notifications.js'
+import {formatPostTime} from '../resource/timeformat.js'
+
 
 export const getComments = (req,res)=>{
-    const q = `SELECT * FROM post_comments WHERE postId = ?`;
+    const q = `SELECT u.username,u.profilepic,pc.content,pc.createat FROM post_comments AS pc 
+            LEFT JOIN users AS u ON u.userid = pc.userID
+            WHERE postId = ?`;
 
     db.query(q,[req.query.postId],(err,data)=>{
         if(err) return res.status(500).json(err);
-        return res.status(200).json(data);
+        const formattedData = data.map((comment) => ({
+            ...comment,
+            createat: formatPostTime(comment.createat), // Transform likeduser into an array
+          }));
+        return res.status(200).json(formattedData);
     });
 }
 

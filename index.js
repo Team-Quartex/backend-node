@@ -10,6 +10,7 @@ import reviews from './routes/reviews.js'
 import reservation from './routes/reservations.js'
 import postSearchs from './routes/postSearchs.js'
 import notifications from './routes/notifications.js'
+import admin from './routes/admin.js'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import multer from 'multer'
@@ -47,6 +48,7 @@ app.use("/api/reviews",reviews)
 app.use("/api/reservation",reservation)
 app.use("/api/search",postSearchs)
 app.use("/api/notification",notifications)
+app.use("/api/trovo/admin",admin)
 
 
 

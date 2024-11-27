@@ -103,7 +103,7 @@ export const sellerStatics = (req, res) => {
   });
 };
 
-export const sellerPayamnet = () => {
+export const sellerPayment = (req, res) => {
   const token = req.cookies.accessTokenseller;
   if (!token) return res.status(401).json("Not Logged in!");
 
@@ -111,15 +111,23 @@ export const sellerPayamnet = () => {
     if (err) return res.status(403).json("Token is not valid");
 
     sellerStaticsQuery(userInfo.id, res, (err, data) => {
-      if (err) return res.status(500).json(err);
-      var earnings = 0;
-      data.foreach((elemnt, index) => {
-        earnings = earnings + parseFloat(elemnt["netTotal"]);
+      if (err) return res.status(500).json({ error: "Database error", details: err });
+
+      // Calculate earnings
+      let earnings = 0;
+      data.forEach((element) => {
+        const netTotal = parseFloat(element["netTotal"]);
+        if (!isNaN(netTotal)) {
+          earnings += netTotal;
+        }
       });
-      res.status(500).json(earnings);
+
+      // Respond with the calculated earnings
+      return res.status(200).json({ earnings });
     });
   });
 };
+
 
 const sellerStaticsQuery = (sellerID, res, callback) => {
   const q = `SELECT 
@@ -129,7 +137,7 @@ const sellerStaticsQuery = (sellerID, res, callback) => {
                 SUM(r.qty) AS totalQuantity, -- Total quantity rented
                 SUM(r.qty * p.price) AS totalPrice, -- Total revenue
                 SUM(r.qty * p.price) * 0.1 AS commission, -- 10% commission
-                SUM(r.qty * p.price) - (SUM(r.qty * p.price) * 0.1) AS netTotal -- Net revenue after commission
+                SUM(r.qty * p.price) - (SUM(r.qty * p.price) * 0.05) AS netTotal -- Net revenue after commission
             FROM 
                 products p
             JOIN 
@@ -146,3 +154,41 @@ const sellerStaticsQuery = (sellerID, res, callback) => {
     callback(null, data);
   });
 };
+
+
+export const sellerWithdraw = (req,res)=>{
+  
+  const token = req.cookies.accessTokenseller;
+  if (!token) return res.status(401).json("Not Logged in!");
+
+  jwt.verify(token, "secretkeyseller", (err, userInfo) => {
+    if (err) return res.status(403).json("Token is not valid");
+
+    const q = `SELECT 
+                  seller_id,
+                  SUM(withdraw_amount) AS total_withdraw 
+              FROM 
+                  seller_withdraw
+              WHERE 
+                  seller_id = ?;`;
+    db.query(q,[userInfo.id],(err,data)=>{
+      if (err) return res.status(500).json(err);
+      return res.status(200).json(data);
+    })
+  });
+}
+
+export const addwithdraw = (req,res)=>{
+  const token = req.cookies.accessTokenseller;
+  if (!token) return res.status(401).json("Not Logged in!");
+
+  jwt.verify(token, "secretkeyseller", (err, userInfo) => {
+    if (err) return res.status(403).json("Token is not valid");
+
+    const q = `INSERT INTO seller_withdraw(seller_id, withdraw_amount) VALUES (?) `;
+    db.query(q,[userInfo.id,req.body.amount],(err,data)=>{
+      if (err) return res.status(500).json(err);
+      return res.status(200).json(data);
+    })
+  });
+}
