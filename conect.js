@@ -5,6 +5,7 @@ export const db = mysql.createConnection({
     user:"root",
     password:"",
     database:"trova_db",
+    charset: 'utf8mb4',
 });
 
 db.connect((err) => {

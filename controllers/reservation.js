@@ -1,5 +1,6 @@
 import { db } from "../conect.js";
 import jwt from "jsonwebtoken";
+import {formatDate} from '../resource/timeformat.js'
 
 export const checkReservation = (req, res) => {
   const token = req.cookies.accessToken;
@@ -73,19 +74,31 @@ export const UserReservationsList = (req, res) => {
     if (err) return res.status(403).json("Token is not valid");
 
     const q = `SELECT 
-                  re.*,p.productId,p.name,se.name  
-                  FROM reservation AS re 
-                  JOIN products AS p ON p.productId = re.productId 
-                  LEFT JOIN product_images AS pi ON pi.productId = p.productId 
-                  LEFT JOIN sellers AS se ON se.sid = p.sellerId
-                  WHERE re.reservationId IN (
-                    SELECT reservationId FROM reservation WHERE userId = ? 
-                  )
-                  ORDER BY re.orderTime DESC`;
+                  re.*,
+                  p.productId,
+                  p.name AS productName,
+                  se.name AS sellerName,
+                  MIN(pi.imageLink) AS productImage,
+                  (re.qty * p.price) AS tot
+              FROM reservation AS re
+              JOIN products AS p ON p.productId = re.productId
+              LEFT JOIN product_images AS pi ON pi.productId = p.productId
+              LEFT JOIN sellers AS se ON se.sid = p.sellerId
+              WHERE re.reservationId IN (
+                  SELECT reservationId FROM reservation WHERE userId = 1
+              )
+              GROUP BY re.reservationId, p.productId, p.name, se.name
+              ORDER BY re.orderTime DESC;`;
 
     db.query(q, [userInfo.id], (err, result) => {
       if (err) return res.status(500).json(err);
-      return res.status(201).json("Reservation added successfully!");
+      const formattedData = result.map((reservation) => ({
+        ...reservation,
+        orderTime: formatDate(reservation.orderTime,""), // Transform likeduser into an array
+        startDate: formatDate(reservation.startDate,"dateonly"), // Transform likeduser into an array
+        endDate: formatDate(reservation.endDate,"dateonly"), // Transform likeduser into an array
+      }));
+      return res.status(201).json(formattedData);
     });
   });
 };

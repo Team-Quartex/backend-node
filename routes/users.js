@@ -1,6 +1,6 @@
 import express from 'express'
 import { login,register,logOut } from '../controllers/auth.js';
-import { topusers, userDetails , addfollower , userPost ,updateduserDetails} from '../controllers/user.js';
+import { topusers, userDetails , addfollower  ,updateduserDetails , otherUserDetails ,recentFollow ,recentPhotos} from '../controllers/user.js';
 
 const router = express.Router();
 
@@ -19,9 +19,14 @@ router.get('/userDetails',userDetails)
 
 router.get('/addfollower',addfollower)
 
-router.get('/userposts',userPost)
 
 router.put('/update',updateduserDetails)
+
+router.get("/otheruser",otherUserDetails)
+
+router.get("/recentFollows",recentFollow)
+
+router.get("/recentPhotos",recentPhotos)
 
 
 

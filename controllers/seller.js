@@ -85,11 +85,11 @@ export const sellerStatics = (req, res) => {
     const q = `SELECT 
                 p.sellerId,
                 p.name AS productName,
-                COUNT(r.reservationId) AS rentedCount, -- Total number of products rented
-                SUM(r.qty) AS totalQuantity, -- Total quantity rented
-                SUM(r.qty * p.price) AS totalPrice, -- Total revenue
-                SUM(r.qty * p.price) * 0.05 AS commission, -- 5% commission
-                SUM(r.qty * p.price) - (SUM(r.qty * p.price) * 0.05) AS netTotal -- Net revenue after commission
+                COUNT(r.reservationId) AS rentedCount, 
+                SUM(r.qty) AS totalQuantity,
+                SUM(r.qty * p.price) AS totalPrice, 
+                SUM(r.qty * p.price) * 0.05 AS commission, 
+                SUM(r.qty * p.price) - (SUM(r.qty * p.price) * 0.05) AS netTotal 
             FROM 
                 products p
             JOIN 
