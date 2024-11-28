@@ -111,7 +111,8 @@ export const sellerPayment = (req, res) => {
     if (err) return res.status(403).json("Token is not valid");
 
     sellerStaticsQuery(userInfo.id, res, (err, data) => {
-      if (err) return res.status(500).json({ error: "Database error", details: err });
+      if (err)
+        return res.status(500).json({ error: "Database error", details: err });
 
       // Calculate earnings
       let earnings = 0;
@@ -127,7 +128,6 @@ export const sellerPayment = (req, res) => {
     });
   });
 };
-
 
 const sellerStaticsQuery = (sellerID, res, callback) => {
   const q = `SELECT 
@@ -155,9 +155,7 @@ const sellerStaticsQuery = (sellerID, res, callback) => {
   });
 };
 
-
-export const sellerWithdraw = (req,res)=>{
-  
+export const sellerWithdraw = (req, res) => {
   const token = req.cookies.accessTokenseller;
   if (!token) return res.status(401).json("Not Logged in!");
 
@@ -171,14 +169,14 @@ export const sellerWithdraw = (req,res)=>{
                   seller_withdraw
               WHERE 
                   seller_id = ?;`;
-    db.query(q,[userInfo.id],(err,data)=>{
+    db.query(q, [userInfo.id], (err, data) => {
       if (err) return res.status(500).json(err);
       return res.status(200).json(data);
-    })
+    });
   });
-}
+};
 
-export const addwithdraw = (req,res)=>{
+export const addwithdraw = (req, res) => {
   const token = req.cookies.accessTokenseller;
   if (!token) return res.status(401).json("Not Logged in!");
 
@@ -186,9 +184,64 @@ export const addwithdraw = (req,res)=>{
     if (err) return res.status(403).json("Token is not valid");
 
     const q = `INSERT INTO seller_withdraw(seller_id, withdraw_amount) VALUES (?) `;
-    db.query(q,[userInfo.id,req.body.amount],(err,data)=>{
+    db.query(q, [userInfo.id, req.body.amount], (err, data) => {
       if (err) return res.status(500).json(err);
       return res.status(200).json(data);
-    })
+    });
   });
-}
+};
+
+export const sellerDetails = (req, res) => {
+  const token = req.cookies.accessTokenseller;
+  if (!token) return res.status(401).json("Not Logged in!");
+
+  jwt.verify(token, "secretkeyseller", (err, userInfo) => {
+    if (err) return res.status(403).json("Token is not valid");
+
+    const q = `SELECT * FROM sellers WHERE sid = ? `;
+    db.query(q, [userInfo.id], (err, data) => {
+      if (err) return res.status(500).json(err);
+      const { password, ...others } = data[0];
+      return res.status(200).json(others);
+    });
+  });
+};
+
+export const sellerUpdate = (req, res) => {
+  const token = req.cookies.accessTokenseller;
+  if (!token) return res.status(401).json("Not Logged in!");
+
+  jwt.verify(token, "secretkeyseller", (err, userInfo) => {
+    if (err) return res.status(403).json("Token is not valid");
+
+    if (err) return res.status(403).json("Token is not valid");
+    var q = "";
+    if (req.body.profilepic === "") {
+      q = `UPDATE users SET name=?, mobile=? ,username=? WHERE userid=?`;
+      db.query(
+        q,
+        [req.body.name, req.body.phone, req.body.username, userInfo.id],
+        (err, data) => {
+          if (err) return res.status(500).json(err);
+          return res.status(200).json(data);
+        }
+      );
+    } else {
+      q = `UPDATE users SET name=?, mobile=? ,username=?,profilepic=? WHERE userid=?`;
+      db.query(
+        q,
+        [
+          req.body.name,
+          req.body.phone,
+          req.body.username,
+          req.body.profilepic,
+          userInfo.id,
+        ],
+        (err, data) => {
+          if (err) return res.status(500).json(err);
+          return res.status(200).json(data);
+        }
+      );
+    }
+  });
+};
