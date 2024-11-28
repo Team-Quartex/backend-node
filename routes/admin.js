@@ -1,6 +1,7 @@
 import express from 'express'
 import {login,allUsers,userPost,sellerProducts,allsellers,verificationRequest} from '../controllers/admin.js'
 import {approve,decline} from '../controllers/verification.js'
+import {productapprove,productdecline} from '../controllers/product.js'
 
 const router = express.Router();
 
@@ -17,6 +18,7 @@ router.put("/request/approve",approve)
 router.put("/request/decline",decline)
 
 
-
+router.put("/product/approve",productapprove)
+router.put("/product/decline",productdecline)
 
 export default router

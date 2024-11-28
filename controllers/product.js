@@ -166,3 +166,34 @@ export const getSingleProduct = (req,res)=>{
         });
     });
 }
+
+
+export const productapprove=(req,res)=>{
+    const token = req.cookies.accessTokenAdmin;
+  if (!token) return res.status(401).json("Not Logged in!");
+
+  jwt.verify(token, "secretkeyAdmin", (err, admin) => {
+    if (err) return res.status(403).json("Token is not valid");
+
+    const q = `UPDATE products SET status = 'available' WHERE productId=?`;
+    db.query(q,[req.body.productId], (err, data) => {
+        if (err) return res.status(500).json(err);
+        return res.status(200).json(data);
+      });
+  });
+}
+
+export const productdecline=(req,res)=>{
+    const token = req.cookies.accessTokenAdmin;
+  if (!token) return res.status(401).json("Not Logged in!");
+
+  jwt.verify(token, "secretkeyAdmin", (err, admin) => {
+    if (err) return res.status(403).json("Token is not valid");
+
+    const q = `UPDATE products SET status = 'decline' WHERE productId=?`;
+    db.query(q,[req.body.productId], (err, data) => {
+        if (err) return res.status(500).json(err);
+        return res.status(200).json(data);
+      });
+  });
+}
