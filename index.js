@@ -116,6 +116,21 @@ app.get('/api/check-cookie-seller', (req, res) => {
   }
 });
 
+app.get('/api/check-cookie-admin', (req, res) => {
+  const accessToken = req.cookies.accessTokenAdmin;
+
+  if (accessToken) {
+      res.json({
+          cookieFound: true,
+          cookieValue: accessToken
+      });
+  } else {
+      res.json({
+          cookieFound: false
+      });
+  }
+});
+
 app.get("/",(req,res)=>{
     res.send("hello");
 });

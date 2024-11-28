@@ -136,7 +136,7 @@ const sellerStaticsQuery = (sellerID, res, callback) => {
                 COUNT(r.reservationId) AS rentedCount, -- Total reservations for the product
                 SUM(r.qty) AS totalQuantity, -- Total quantity rented
                 SUM(r.qty * p.price) AS totalPrice, -- Total revenue
-                SUM(r.qty * p.price) * 0.1 AS commission, -- 10% commission
+                SUM(r.qty * p.price) * 0.05 AS commission, -- 10% commission
                 SUM(r.qty * p.price) - (SUM(r.qty * p.price) * 0.05) AS netTotal -- Net revenue after commission
             FROM 
                 products p
