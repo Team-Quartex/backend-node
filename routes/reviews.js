@@ -1,9 +1,9 @@
 import express from 'express'
-import {starCount , getReviews} from '../controllers/review.js'
+import {starCount , getReviews,addreview } from '../controllers/review.js'
 
 const router = express.Router();
 
-router.post("/add",starCount)
+router.post("/add",addreview )
 router.get("/star",starCount)
 router.get("/reviews",getReviews)
 

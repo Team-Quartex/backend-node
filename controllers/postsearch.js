@@ -143,7 +143,8 @@ function getSearchResQuery(id,search, callback) {
     CASE 
         WHEN uf.folowing_by IS NOT NULL THEN 'yes'
         ELSE 'no'
-    END AS isFollowed
+    END AS isFollowed,
+CASE WHEN sp.userId IS NOT NULL THEN 'yes' ELSE 'no' END AS isSaved
 FROM posts AS p
 JOIN users AS u ON u.userid = p.userId
 LEFT JOIN post_image AS pi ON pi.postId = p.postId
@@ -151,6 +152,7 @@ LEFT JOIN post_likes AS pl ON pl.postId = p.postId
 LEFT JOIN post_comments AS pc ON pc.postId = p.postId
 LEFT JOIN 
     user_follows AS uf ON uf.follow = u.userid AND uf.folowing_by = ?
+LEFT JOIN saved_posts AS sp ON sp.postId = p.postId AND sp.userId = ?
 WHERE p.description LIKE ? OR p.location = ? 
 GROUP BY p.postId, u.userid
 ORDER BY p.postTime DESC
@@ -158,7 +160,7 @@ ORDER BY p.postTime DESC
   `;
   const searchTerm = `%${search}%`;
 
-  db.query(q, [id,searchTerm,searchTerm], (err, data) => {
+  db.query(q, [id,id,searchTerm,searchTerm], (err, data) => {
     if (err) return callback(err);
     const formattedData = data.map((post) => ({
       ...post,

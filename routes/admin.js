@@ -1,16 +1,18 @@
 import express from 'express'
-import {login,allUsers,userPost,sellerProducts,allsellers,verificationRequest} from '../controllers/admin.js'
+import {login,allUsers,userPost,sellerProducts,allsellers,verificationRequest,paymentTable, logOut} from '../controllers/admin.js'
 import {approve,decline} from '../controllers/verification.js'
 import {productapprove,productdecline} from '../controllers/product.js'
 
 const router = express.Router();
 
 router.post("/login",login)
+router.get("/logout",logOut)
+
 router.get("/users",allUsers)
 router.get("/userpost",userPost)
 router.get("/sellers",allsellers)
 router.get("/sellerproduct",sellerProducts)
-router.get("/payment")
+router.get("/payment",paymentTable)
 router.get("/verification",verificationRequest)
 
 

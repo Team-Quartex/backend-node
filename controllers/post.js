@@ -9,31 +9,21 @@ export const getPosts = (req, res) => {
   jwt.verify(token, "secretkey", (err, userInfo) => {
     if (err) return res.status(403).json("Token is not valid");
 
-    const q = `SELECT 
-                    p.*, 
-                    u.userid AS UserId, 
-                    u.name, 
-                    u.profilePic,
-                    u.verify,
-                    COUNT(DISTINCT pc.postId) AS comments,
-                    GROUP_CONCAT(DISTINCT pl.userId) AS likeduser, -- Use DISTINCT here
-                    GROUP_CONCAT(DISTINCT pi.imageLink) AS images,
-                    CASE 
-                        WHEN uf.folowing_by IS NOT NULL THEN 'yes'
-                        ELSE 'no'
-                    END AS isFollowed
-                FROM posts AS p
-                JOIN users AS u ON u.userid = p.userId
-                LEFT JOIN post_image AS pi ON pi.postId = p.postId
-                LEFT JOIN post_likes AS pl ON pl.postId = p.postId
-                LEFT JOIN post_comments AS pc ON pc.postId = p.postId
-                LEFT JOIN 
-                    user_follows AS uf ON uf.follow = u.userid AND uf.folowing_by = ?
-                GROUP BY p.postId, u.userid
-                ORDER BY p.postTime DESC
-                LIMIT 20`;
+    const q = `SELECT p.*, u.userid AS UserId, u.name, u.profilePic, u.verify, 
+        COUNT(DISTINCT pc.postId) AS comments, GROUP_CONCAT(DISTINCT pl.userId) AS likeduser, -- Use DISTINCT here 
+        GROUP_CONCAT(DISTINCT pi.imageLink) AS images, 
+        CASE WHEN uf.folowing_by IS NOT NULL THEN 'yes' ELSE 'no' END AS isFollowed, 
+        CASE WHEN sp.userId IS NOT NULL THEN 'yes' ELSE 'no' END AS isSaved 
+        FROM posts AS p JOIN users AS u ON u.userid = p.userId 
+        LEFT JOIN post_image AS pi ON pi.postId = p.postId 
+        LEFT JOIN post_likes AS pl ON pl.postId = p.postId 
+        LEFT JOIN post_comments AS pc ON pc.postId = p.postId 
+        LEFT JOIN user_follows AS uf ON uf.follow = u.userid AND uf.folowing_by = ? 
+        LEFT JOIN saved_posts AS sp ON sp.postId = p.postId AND sp.userId = ? 
+        GROUP BY p.postId, u.userid 
+        ORDER BY p.postTime DESC LIMIT 20`;
 
-        db.query(q,[userInfo.id], (err, data) => {
+        db.query(q,[userInfo.id,userInfo.id], (err, data) => {
         if (err) return res.status(500).json(err);
 
         // Transform the `images` field from comma-separated string to an array
@@ -102,7 +92,8 @@ export const userPost = (req, res) => {
                       CASE 
                           WHEN uf.folowing_by IS NOT NULL THEN 'yes'
                           ELSE 'yes'
-                      END AS isFollowed
+                      END AS isFollowed,
+                      CASE WHEN sp.userId IS NOT NULL THEN 'yes' ELSE 'no' END AS isSaved 
                   FROM posts AS p
                   JOIN users AS u ON u.userid = p.userId
                   LEFT JOIN post_image AS pi ON pi.postId = p.postId
@@ -110,11 +101,12 @@ export const userPost = (req, res) => {
                   LEFT JOIN post_comments AS pc ON pc.postId = p.postId
                   LEFT JOIN 
                       user_follows AS uf ON uf.follow = u.userid AND uf.folowing_by = ?
+                  LEFT JOIN saved_posts AS sp ON sp.postId = p.postId AND sp.userId = ?
                   where u.userid = ?
                   GROUP BY p.postId, u.userid
                   ORDER BY p.postTime DESC`;
   
-      db.query(q, [userInfo.id, req.query.uid], (err, data) => {
+      db.query(q, [userInfo.id,userInfo.id, req.query.uid], (err, data) => {
         if (err) return res.status(500).json(err);
   
         // Transform the `images` field from comma-separated string to an array

@@ -33,6 +33,13 @@ export const login = (req,res)=>{
 
 }
 
+export const logOut = (req,res)=>{
+    res.clearCookie("accessTokenAdmin",{
+        secure: true,
+        sameSite:"none"
+    }).status(200).json("User has been logged out!")
+}
+
 
 export const allUsers=(req,res)=>{
     const token = req.cookies.accessTokenAdmin;
@@ -107,7 +114,8 @@ export const sellerProducts = (req,res) =>{
       if (err) return res.status(403).json("Token is not valid");
   
       const q = `SELECT 
-                    p.*,  
+                    p.*,
+                    u.name AS username,  
                     GROUP_CONCAT(pi.imageLink) AS images
                 FROM 
                     products AS p
@@ -155,7 +163,7 @@ export const verificationRequest = (req,res) =>{
   });
 }
 
-export const paymentTable = () =>{
+export const paymentTable = (req,res) =>{
     const token = req.cookies.accessTokenAdmin;
   if (!token) return res.status(401).json("Not Logged in!");
 
