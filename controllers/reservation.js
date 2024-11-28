@@ -98,7 +98,7 @@ export const UserReservationsList = (req, res) => {
         startDate: formatDate(reservation.startDate,"dateonly"), // Transform likeduser into an array
         endDate: formatDate(reservation.endDate,"dateonly"), // Transform likeduser into an array
       }));
-      return res.status(201).json(formattedData);
+      return res.status(200).json(formattedData);
     });
   });
 };
