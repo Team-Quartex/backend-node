@@ -35,7 +35,7 @@ export const login = (req,res)=>{
 
 
 export const allUsers=(req,res)=>{
-    const token = req.cookies.accessTokenseller;
+    const token = req.cookies.accessTokenAdmin;
   if (!token) return res.status(401).json("Not Logged in!");
 
   jwt.verify(token, "secretkeyAdmin", (err, admin) => {
@@ -50,7 +50,7 @@ export const allUsers=(req,res)=>{
 }
 
 export const userPost = () =>{
-    const token = req.cookies.accessTokenseller;
+    const token = req.cookies.accessTokenAdmin;
     if (!token) return res.status(401).json("Not Logged in!");
   
     jwt.verify(token, "secretkeyAdmin", (err, admin) => {
@@ -85,7 +85,7 @@ export const userPost = () =>{
 }
 
 export const allsellers=(req,res)=>{
-    const token = req.cookies.accessTokenseller;
+    const token = req.cookies.accessTokenAdmin;
   if (!token) return res.status(401).json("Not Logged in!");
 
   jwt.verify(token, "secretkeyAdmin", (err, admin) => {
@@ -100,7 +100,7 @@ export const allsellers=(req,res)=>{
 }
 
 export const sellerProducts = (req,res) =>{
-    const token = req.cookies.accessTokenseller;
+    const token = req.cookies.accessTokenAdmin;
     if (!token) return res.status(401).json("Not Logged in!");
   
     jwt.verify(token, "secretkeyAdmin", (err, admin) => {
@@ -137,13 +137,13 @@ export const sellerProducts = (req,res) =>{
 }
 
 export const verificationRequest = (req,res) =>{
-    const token = req.cookies.accessTokenseller;
+    const token = req.cookies.accessTokenAdmin;
   if (!token) return res.status(401).json("Not Logged in!");
 
   jwt.verify(token, "secretkeyAdmin", (err, admin) => {
     if (err) return res.status(403).json("Token is not valid");
 
-    const q = `SELECT v.*,u.userid,u.username,u.email FROM verifiction_request AS v LEFT JOIN users AS u ON u.userid = v.userId`;
+    const q = `SELECT v.*,u.userid,u.username,u.email FROM verifiction_request AS v LEFT JOIN users AS u ON u.userid = v.userId WHERE status='pending'`;
     db.query(q, (err, data) => {
       if (err) return res.status(500).json(err);
       const formattedData = data.map((request) => ({
@@ -156,7 +156,7 @@ export const verificationRequest = (req,res) =>{
 }
 
 export const paymentTable = () =>{
-    const token = req.cookies.accessTokenseller;
+    const token = req.cookies.accessTokenAdmin;
   if (!token) return res.status(401).json("Not Logged in!");
 
   jwt.verify(token, "secretkeyAdmin", (err, admin) => {

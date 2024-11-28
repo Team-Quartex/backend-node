@@ -48,7 +48,7 @@ app.use("/api/reviews",reviews)
 app.use("/api/reservation",reservation)
 app.use("/api/search",postSearchs)
 app.use("/api/notification",notifications)
-app.use("/api/trovo/admin",admin)
+app.use("/api/trova/admin",admin)
 
 
 
