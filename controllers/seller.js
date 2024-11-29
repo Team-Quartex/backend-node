@@ -95,7 +95,7 @@ FROM
 JOIN 
     reservation r ON p.productId = r.productId
 WHERE 
-    p.sellerId = 4
+    p.sellerId = ?
 GROUP BY
     p.productId, p.sellerId, p.name
 ORDER BY
