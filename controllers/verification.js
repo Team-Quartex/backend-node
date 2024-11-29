@@ -36,3 +36,19 @@ export const decline=(req,res)=>{
     });
   });
 }
+
+export const requestverify = (req,res) => {
+  const token = req.cookies.accessToken;
+  if (!token) return res.status(401).json("Not Logged in!");
+
+  jwt.verify(token, "secretkey", (err, userInfo) => {
+    if (err) return res.status(403).json("Token is not valid");
+
+    const q = `INSERT INTO verifiction_request (userId,description,ytlink,fblink,twitterlink) VALUES (?)`;
+
+    db.query(q, [userInfo.id,req.body.desc,req.body.yt,req.body.fb,req.body.tw], (err, data) => {
+      if (err) return res.status(500).json(err);
+      return res.status(200).json(data);
+    });
+  });
+}

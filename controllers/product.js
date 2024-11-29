@@ -1,5 +1,6 @@
 import { db } from "../conect.js";
 import jwt from "jsonwebtoken";
+import { addSellerNotifications } from "./notifications.js";
 
 export const addproduct = (req,res)=>{
     const token = req.cookies.accessTokenseller;
@@ -31,6 +32,7 @@ export const addproduct = (req,res)=>{
                     if (err) return res.status(500).json(err);
                 })
             }
+            addSellerNotifications(proId,"","product",0,"");
             return res.status(200).json("Product has been created.");
         });
     });
@@ -178,6 +180,7 @@ export const productapprove=(req,res)=>{
     const q = `UPDATE products SET status = 'available' WHERE productId=?`;
     db.query(q,[req.body.productId], (err, data) => {
         if (err) return res.status(500).json(err);
+        addSellerNotifications(req.body.productId,"","product",2,"");
         return res.status(200).json(data);
       });
   });
@@ -193,6 +196,7 @@ export const productdecline=(req,res)=>{
     const q = `UPDATE products SET status = 'decline' WHERE productId=?`;
     db.query(q,[req.body.productId], (err, data) => {
         if (err) return res.status(500).json(err);
+        addSellerNotifications(req.body.productId,"","product",1,"");
         return res.status(200).json(data);
       });
   });

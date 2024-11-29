@@ -1,5 +1,6 @@
 import { db } from "../conect.js";
 import jwt from "jsonwebtoken";
+import { addSellerNotifications } from "./notifications.js";
 
 export const addreview = (req, res) => {
   const token = req.cookies.accessToken;
@@ -18,6 +19,7 @@ export const addreview = (req, res) => {
     ];
     db.query(q, [values], (err, data) => {
       if (err) return res.status(500).json(err);
+      addSellerNotifications(req.body.proId,userInfo.id,"review",req.body.count,"")
       return res.status(200).json("Review has been created has been created");
     });
   });

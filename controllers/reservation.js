@@ -1,6 +1,8 @@
 import { db } from "../conect.js";
 import jwt from "jsonwebtoken";
 import {formatDate} from '../resource/timeformat.js'
+import { addSellerNotifications } from "./notifications.js";
+
 
 export const checkReservation = (req, res) => {
   const token = req.cookies.accessToken;
@@ -60,6 +62,7 @@ export const addReservation = (req, res) => {
       ],
       (err, result) => {
         if (err) return res.status(500).json(err);
+        addSellerNotifications(req.body.productId,userInfo.id,"reserve",req.body.quantity,req.body.start)
         return res.status(200).json("Reservation added successfully!");
       }
     );
