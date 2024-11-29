@@ -21,7 +21,7 @@ export const getPosts = (req, res) => {
         LEFT JOIN user_follows AS uf ON uf.follow = u.userid AND uf.folowing_by = ? 
         LEFT JOIN saved_posts AS sp ON sp.postId = p.postId AND sp.userId = ? 
         GROUP BY p.postId, u.userid 
-        ORDER BY p.postTime DESC LIMIT 20`;
+        ORDER BY p.postTime DESC`;
 
         db.query(q,[userInfo.id,userInfo.id], (err, data) => {
         if (err) return res.status(500).json(err);

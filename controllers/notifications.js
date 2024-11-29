@@ -1,5 +1,5 @@
 import { db } from "../conect.js";
-import {formatPostTime} from '../resource/timeformat.js'
+import {formatPostTime,formatDate} from '../resource/timeformat.js'
 import jwt from "jsonwebtoken";
 
 export const getnotifications = (req, res) => {
@@ -142,3 +142,80 @@ export const addshareNotification = (notifiFrom, notify, postId) => {
     });
   }
 };
+
+export const addSellerNotifications=(proid,user,type,num,date)=>{
+
+    const nq = "SELECT sellerId FROM products WHERE productId = ?"
+    db.query(nq,[proid],(err,data)=>{
+      if(err){
+        console.log(err);
+        return;
+      }
+      const sellerID = data[0].sellerId;
+      const q = `INSERT INTO seller_notificatin (sellerid, userId, notification_type,productId,qtyorrate,reserveDate) VALUES (?)`;
+    const values = [sellerID,user,type,proid,num,date];
+
+    db.query(q, [values], (err, data) => {
+      if (err) {
+        console.error(err);
+      } else {
+      }
+    });
+    })
+    
+}
+
+export const viewSellerNofification=(req,res)=>{
+  const token = req.cookies.accessTokenseller;
+  if (!token) return res.status(401).json("Not Logged in!");
+
+  jwt.verify(token, "secretkeyseller", (err, userInfo) => {
+    if (err) return res.status(403).json("Token is not valid");
+
+    const q = `SELECT 
+                  n.*, 
+                  u.name, 
+                  u.profilepic, 
+                  p.name AS product, 
+                  MIN(pi.imageLink) AS productImage 
+              FROM 
+                  seller_notificatin AS n
+              LEFT JOIN 
+                  users AS u ON u.userid = n.userId
+              LEFT JOIN 
+                  products AS p ON p.productId = n.productId
+              LEFT JOIN 
+                  product_images AS pi ON pi.productId = p.productId
+              WHERE 
+                  n.sellerid = 8
+              GROUP BY 
+                  n.notification_id, u.name, u.profilepic, p.name
+              ORDER BY 
+                  n.notifyTime DESC;`;
+    db.query(q, [userInfo.id], (err, data) => {
+      console.log(err)
+      if (err) return res.status(500).json(err);
+      const formattedData = data.map((notification) => ({
+        ...notification,
+        reserveDate: formatDate(notification.reserveDate,"dateonly")
+        // reserveDate: formatPostTime(notification.reserveDate,"dateonly"), // Transform likeduser into an array
+      }));
+      return res.status(200).json(formattedData);
+    });
+  });
+}
+
+export const sellerSetviewNotification = (req,res)=>{
+  const token = req.cookies.accessTokenseller;
+  if (!token) return res.status(401).json("Not Logged in!");
+
+  jwt.verify(token, "secretkeyseller", (err, userInfo) => {
+    if (err) return res.status(403).json("Token is not valid");
+
+  const q = `UPDATE seller_notificatin SET isView='yes' WHERE sellerid = ? AND isView = 'no'`;
+  db.query(q, [userInfo.id], (err, data) => {
+    if (err) return res.status(500).json(err);
+    return res.status(200).json(data);
+  });
+});
+}
