@@ -187,7 +187,7 @@ export const viewSellerNofification=(req,res)=>{
               LEFT JOIN 
                   product_images AS pi ON pi.productId = p.productId
               WHERE 
-                  n.sellerid = 8
+                  n.sellerid = ?
               GROUP BY 
                   n.notification_id, u.name, u.profilepic, p.name
               ORDER BY 

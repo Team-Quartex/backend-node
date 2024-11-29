@@ -83,19 +83,23 @@ export const sellerStatics = (req, res) => {
     if (err) return res.status(403).json("Token is not valid");
 
     const q = `SELECT 
-                p.sellerId,
-                p.name AS productName,
-                COUNT(r.reservationId) AS rentedCount, 
-                SUM(r.qty) AS totalQuantity,
-                SUM(r.qty * p.price) AS totalPrice, 
-                SUM(r.qty * p.price) * 0.05 AS commission, 
-                SUM(r.qty * p.price) - (SUM(r.qty * p.price) * 0.05) AS netTotal 
-            FROM 
-                products p
-            JOIN 
-                reservation r ON p.productId = r.productId
-            WHERE 
-                p.sellerId = ?;`;
+    p.sellerId,
+    p.name AS productName,
+    COUNT(r.reservationId) AS rentedCount, 
+    SUM(r.qty) AS totalQuantity,
+    SUM(r.qty * p.price) AS totalPrice, 
+    SUM(r.qty * p.price) * 0.05 AS commission, 
+    SUM(r.qty * p.price) - (SUM(r.qty * p.price) * 0.05) AS netTotal 
+FROM 
+    products p
+JOIN 
+    reservation r ON p.productId = r.productId
+WHERE 
+    p.sellerId = 4
+GROUP BY
+    p.productId, p.sellerId, p.name
+ORDER BY
+    p.productId;;`;
     db.query(q, [userInfo.id], (err, data) => {
       if (err) return res.status(500).json(err);
       return res.status(200).json(data);
