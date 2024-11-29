@@ -67,7 +67,7 @@ export const userPost = (req,res) =>{
                     p.*,
                     COUNT(DISTINCT pc.postId) AS comments,
                     COUNT(DISTINCT pl.userId) AS likeduser,
-                    GROUP_CONCAT(pi.imageLink) AS images
+                    GROUP_CONCAT(DISTINCT pi.imageLink) AS images
                 FROM posts AS p
                 JOIN users AS u ON u.userid = p.userId
                 LEFT JOIN post_image AS pi ON pi.postId = p.postId
