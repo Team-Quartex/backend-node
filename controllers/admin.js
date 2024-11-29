@@ -56,7 +56,7 @@ export const allUsers=(req,res)=>{
   });
 }
 
-export const userPost = () =>{
+export const userPost = (req,res) =>{
     const token = req.cookies.accessTokenAdmin;
     if (!token) return res.status(401).json("Not Logged in!");
   
