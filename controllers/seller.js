@@ -166,19 +166,22 @@ export const sellerWithdraw = (req, res) => {
   jwt.verify(token, "secretkeyseller", (err, userInfo) => {
     if (err) return res.status(403).json("Token is not valid");
 
-    const q = `SELECT 
-                  seller_id,
-                  SUM(withdraw_amount) AS total_withdraw 
-              FROM 
-                  seller_withdraw
-              WHERE 
-                  seller_id = ?;`;
+    const q = `
+      SELECT 
+        seller_id,
+        IFNULL(SUM(withdraw_amount), 0) AS total_withdraw 
+      FROM 
+        seller_withdraw
+      WHERE 
+        seller_id = ?;
+    `;
     db.query(q, [userInfo.id], (err, data) => {
       if (err) return res.status(500).json(err);
-      return res.status(200).json(data);
+      return res.status(200).json(data[0] || { seller_id: userInfo.id, total_withdraw: 0 });
     });
   });
 };
+
 
 export const addwithdraw = (req, res) => {
   const token = req.cookies.accessTokenseller;
