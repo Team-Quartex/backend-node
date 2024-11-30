@@ -33,6 +33,8 @@ export const addLike = (req, res) => {
 };
 
 export const deleteLike = (req, res) => {
+      console.log('hello');
+
     console.log(req.body.postId);
     const token = req.cookies.accessToken;
     if (!token) return res.status(401).json("Not Logged in!");

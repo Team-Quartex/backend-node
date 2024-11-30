@@ -10,6 +10,7 @@ import reviews from './routes/reviews.js'
 import reservation from './routes/reservations.js'
 import postSearchs from './routes/postSearchs.js'
 import notifications from './routes/notifications.js'
+import admin from './routes/admin.js'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import multer from 'multer'
@@ -47,6 +48,7 @@ app.use("/api/reviews",reviews)
 app.use("/api/reservation",reservation)
 app.use("/api/search",postSearchs)
 app.use("/api/notification",notifications)
+app.use("/api/trova/admin",admin)
 
 
 
@@ -97,6 +99,36 @@ const storage = multer.diskStorage({
             cookieFound: false
         });
     }
+});
+
+app.get('/api/check-cookie-seller', (req, res) => {
+  const accessToken = req.cookies.accessTokenseller;
+
+  if (accessToken) {
+      res.json({
+          cookieFound: true,
+          cookieValue: accessToken
+      });
+  } else {
+      res.json({
+          cookieFound: false
+      });
+  }
+});
+
+app.get('/api/check-cookie-admin', (req, res) => {
+  const accessToken = req.cookies.accessTokenAdmin;
+
+  if (accessToken) {
+      res.json({
+          cookieFound: true,
+          cookieValue: accessToken
+      });
+  } else {
+      res.json({
+          cookieFound: false
+      });
+  }
 });
 
 app.get("/",(req,res)=>{
